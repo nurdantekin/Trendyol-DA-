@@ -1,6 +1,6 @@
 --Q1: Promosyon çıkılmış fakat hiç satılmamış ürünleri tespit edebilir miyiz?
 
-with promotion as (SELECT distinct wa.visitId,
+WITH promotion AS (SELECT DISTINCT wa.visitId,
   promo.promoName AS Promotion_Name,
   COUNT(hit.promotionActionInfo.promoIsView) AS Promotion_Views,
   COUNT(hit.promotionActionInfo.promoIsClick) AS Promotion_Clicks
@@ -12,13 +12,14 @@ GROUP BY
   wa.visitId,Promotion_Name
 HAVING Promotion_Clicks != 0),
 
-product as (select  distinct wa.visitId, p.v2ProductName as product_name
-from `data-to-insights.ecommerce.web_analytics` wa 
-    cross join unnest(wa.hits) h
-    cross join unnest(h.product) p)
+product AS (SELECT  DISTINCT wa.visitId, p.v2ProductName AS product_name
+FROM `data-to-insights.ecommerce.web_analytics` wa 
+    cross JOIN unnest(wa.hits) h
+    cross JOIN unnest(h.product) p)
 
-select distinct p1.product_name  from promotion p join product p1 on p.visitId=p1.visitId join `data-to-insights.ecommerce.products` p2 on p1.product_name = p2.name
-where orderedQuantity = 0;
+SELECT  DISTINCT p1.product_name  FROM promotion p JOIN product p1 ON p.visitId=p1.visitId JOIN `data-to-insights.ecommerce.products` p2 ON p1.product_name = p2.name
+WHERE orderedQuantity = 0;
+
 
 
 --Q2: Mart, nisan, mayıs aylarında ziyaretçilerin en çok görüntülediği fakat satın alınmamış ürünlere ihtiyacımız var. Her ayın top 10 ürününü gösterebilir misiniz? (Tarih yıl - ay olarak gösterilmeli.)
@@ -47,7 +48,6 @@ GROUP BY date_, t.month_, t.nameproduct, t.total_view
 HAVING t.month_ = 4
 ORDER BY total_view DESC LIMIT 10)
 
-
 UNION ALL
 
 (select CONCAT(EXTRACT(YEAR FROM PARSE_DATE('%Y%m%d',a.date)), '-',t.month_) as date_, t.month_, t.nameproduct, t.total_view,
@@ -56,6 +56,7 @@ WHERE  p.orderedQuantity = 0
 GROUP BY date_, t.month_, t.nameproduct, t.total_view 
 HAVING t.month_ = 5
 ORDER BY total_view DESC LIMIT 10);
+
 
 
 --Q3: E ticaret sitemiz için günün bölümlerinde, en fazla ilgi gören kategorileri öğrenmek istiyoruz.
